@@ -1,0 +1,245 @@
+
+# - http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# - https://github.com/spring-cloud/spring-cloud-config/blob/d9113a417dccff271744be3a4039e270b0cebd76/docs/src/main/asciidoc/spring-cloud-config.adoc#quick-start
+# - https://github.com/spring-cloud/spring-cloud-consul/blob/master/docs/src/main/asciidoc/spring-cloud-consul.adoc
+# - https://github.com/spring-cloud/spring-cloud-netflix/blob/8fb89b25d955fe175410853cea3b09333ef32d74/docs/src/main/asciidoc/spring-cloud-netflix.adoc
+# - https://github.com/Netflix
+# - https://github.com/Netflix/Hystrix/wiki/Configuration#intro
+# - https://github.com/Netflix/eureka/wiki/Configuring-Eureka
+# - https://github.com/Netflix/Turbine/wiki/Configuration-(1.x)
+
+info:
+  title: ${project.name}
+  git:
+    commitID: ${git.commit.id}
+    commitTime: ${git.commit.time}
+
+#-----------------------------------------------------------------------------------------------
+# HEALTH INDICATORS
+#-----------------------------------------------------------------------------------------------
+management:
+  context-path: /admin
+  health:
+    defaults:
+      enabled: true # Enable default health indicators.
+    db:
+      enabled: false # Enable database health check.
+    cassandra:
+      enabled: false # Enable cassandra health check.
+    couchbase:
+      enabled: false # Enable couchbase health check.
+    diskspace:
+      enabled: false # Enable disk space health check.
+      path: / # Path used to compute the available disk space.
+      threshold: 0 # Minimum disk space that should be available, in bytes.
+    elasticsearch:
+      enabled: false # Enable elasticsearch health check.
+      indices: # Comma-separated index names.
+      response-timeout: 100 # The time, in milliseconds, to wait for a response from the cluster.
+    jms:
+      enabled: false # Enable JMS health check.
+    ldap:
+      enabled: false # Enable LDAP health check.
+    mail:
+      enabled: false # Enable Mail health check.
+    mongo:
+      enabled: false # Enable MongoDB health check.
+    rabbit:
+      enabled: false # Enable RabbitMQ health check.
+    redis:
+      enabled: false # Enable Redis health check.
+    solr:
+      enabled: false # Enable Solr health check.
+    status:
+      order: DOWN, OUT_OF_SERVICE, UP, UNKNOWN # Comma-separated list of health statuses in order of severity.
+health:
+  config:
+    enabled: false # Turn on/off health indicator for config clients.
+
+# ----------------------------------------
+# ACTUATOR PROPERTIES
+# ----------------------------------------
+# ENDPOINTS (AbstractEndpoint subclasses)
+endpoints:
+  enabled: true # Enable endpoints.
+  sensitive: false # Default endpoint sensitive setting.
+  env:
+    enabled: true
+  health:
+    enabled: true
+  info:
+    enabled: true
+  logfile:
+    enabled: true
+  mappings:
+    enabled: true
+  metrics:
+    enabled: true
+  shutdown:
+    enabled: true
+  restart:
+    enabled: true
+  trace:
+    enabled: true
+
+# ----------------------------------------
+# FEIGN
+# ----------------------------------------
+feign:
+  histrix:
+    enabled: false
+  compression:
+    request:
+      enabled: true
+    response:
+      enabled: true
+
+# ----------------------------------------
+# HYSTRIX
+# ----------------------------------------
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: THREAD
+          thread:
+            timeoutInMilliseconds: 60000
+            interruptOnTimeout: true
+          semaphore:
+            maxConcurrentRequests: 10
+      fallback:
+        enabled: true
+        isolation:
+          semaphore:
+            maxConcurrentRequests: 10
+      circuitBreaker:
+        enabled: true
+        requestVolumeThreshold: 20
+        sleepWindowInMilliseconds: 5000
+        errorThresholdPercentage: 50
+        forceOpen: false
+        forceClosed: false
+      metrics:
+        rollingStats:
+        timeInMilliseconds: 10000
+        numBuckets: 10
+      rollingPercentile:
+        enabled: true
+        timeInMilliseconds: 60000
+        numBuckets: 6
+        bucketSize: 100
+      healthSnapshot:
+        intervalInMilliseconds: 500
+
+# ----------------------------------------
+# RIBBON
+# ----------------------------------------
+ribbon:
+  eureka:
+    enabled: false
+  MaxAutoRetries: 1 # Max number of retries on the same server (excluding the first try)
+  MaxAutoRetriesNextServer: 1 # Max number of next servers to retry (excluding the first server)
+  OkToRetryOnAllOperations: true # Whether all operations can be retried for this client
+  ServerListRefreshInterval: 2000 # Interval to refresh the server list from the source
+  ConnectTimeout: 30000 # Connect timeout used by Apache HttpClient
+  ReadTimeout: 30000 # Read timeout used by Apache HttpClient
+  #listOfServers: www.microsoft.com:80,www.yahoo.com:80,www.google.com:80
+
+
+# =========================
+# PROFILE LOCAL
+# =========================
+---
+spring:
+  profiles: local
+  datasources:
+    postgresql_local:
+      jdbcUrl: jdbc:postgresql://localhost:5432/postgres
+      driverClassName: org.postgresql.Driver
+      username: postgres
+      password: postgres
+      poolName: AtlasHikariCP
+      maxLifetime: 1200000
+      maximumPoolSize: 10
+      minimumIdle: 1
+    mysql_local:
+      jdbcUrl: jdbc:mysql://localhost:3306/DATABASE
+      driverClassName: com.mysql.jdbc.Driver
+      username: root
+      password: root
+      poolName: AtlasHikariCP
+      maxLifetime: 1200000
+      maximumPoolSize: 10
+      minimumIdle: 1
+  mybatis:
+    type-aliases-package: com.authenticationservice.db.repository
+    type-handlers-package: classpath*:**/SqlMaps/*.xml
+    config-location: classpath:mybatis-config.xml
+  cache:
+    caffeine:
+      configurations:
+        - cacheName: CAFFEINE_CACHE_1
+          #initialCapacity:
+          maximumSize: 100
+          #maximumWeight:
+          #expireAfterAccess: #SECONDS
+          #expireAfterWrite: #SECONDS
+          #refreshAfterWrite: #SECONDS
+          #concurrencyLevel:
+        - cacheName: CAFFEINE_CACHE_2
+          #initialCapacity:
+          maximumSize: 100
+          #maximumWeight:
+          #expireAfterAccess: #SECONDS
+          #expireAfterWrite: #SECONDS
+          #refreshAfterWrite: #SECONDS
+          #concurrencyLevel:
+  redis:
+    database: 0 # Database index used by the connection factory.
+    url: # Connection URL, will override host, port and password (user will be ignored), e.g. redis://user:password@example.com:6379
+    host: 127.0.0.1 # Redis server host.
+    port: 6379 # Redis server port.
+    password: # Login password of the redis server.
+    ssl: false # Enable SSL support.
+    timeout: 0 # Connection timeout in milliseconds.
+    pool:
+      enabled: false
+      max-active: 8 # Max number of connections that can be allocated by the pool at a given time. Use a negative value for no limit.
+      max-idle: 8 # Max number of "idle" connections in the pool. Use a negative value to indicate an unlimited number of idle connections.
+      max-wait: -1 # Maximum amount of time (in milliseconds) a connection allocation should block before throwing an exception when the pool is exhausted. Use a negative value to block indefinitely.
+      min-idle: 0 # Target for the minimum number of idle connections to maintain in the pool. This setting only has an effect if it is positive.
+    cluster:
+      enabled: false
+      max-redirects: 10 # Maximum number of redirects to follow when executing commands across the cluster.
+      nodes: 127.0.0.1:6379 # Comma-separated list of "host:port" pairs to bootstrap from.
+    sentinel:
+      enabled: false
+      master: mymaster # Name of Redis server.
+      nodes: 127.0.0.1:27379 # Comma-separated list of host:port pairs.
+ldap:
+  domain: tui.com
+  url: ldap://tui.com
+
+# =========================
+# Logging configuration
+# =========================
+logging:
+  level:
+    org.springframework: WARN
+    com.authenticationservice: DEBUG
+  pattern:
+    console: '%highlight{%-5p|%d{ISO8601}{GMT}|trace=%X{X-B3-TraceId},span=%X{X-B3-SpanId}|%c{1}|%m%ex%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=blue bold, DEBUG=green bold, TRACE=blue}'
+    file: '%-5p|%d{ISO8601}{GMT}|trace=%X{X-B3-TraceId},span=%X{X-B3-SpanId}|%c{1}|%m%ex%n'
+  config: classpath:log4j2-spring.xml
+
+# =========================
+# Swagger configuration
+# =========================
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /api-docs

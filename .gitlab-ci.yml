@@ -1,0 +1,161 @@
+variables:
+  DOCKER_REPOSITORY: tui/authentication-service
+  # This will supress any download for dependencies and plugins or upload messages which would clutter the console log.
+  # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -s settings.xml"
+  # AWS
+  AWS_SERVICE_NAME: authentication-service
+  AWS_DEFAULT_REGION: eu-central-1
+  AWS_CLUSTER_DEV: D-09OLPECSSERVICES
+
+# Cache downloaded dependencies and plugins between builds.
+# To keep cache across branches add 'key: "$CI_JOB_REF_NAME"'
+cache:
+  paths:
+    - .m2/repository
+
+before_script:
+  - export VERSION=${CI_PIPELINE_ID}-${CI_BUILD_REF:0:8}
+  - export IMAGE=${DOCKER_REGISTRY_URL}/${DOCKER_REPOSITORY}:${VERSION}
+  - export IMAGE_LATEST=${DOCKER_REGISTRY_URL}/${DOCKER_REPOSITORY}:latest
+
+stages:
+  - maven:build
+  - maven:test
+  - analysis
+  - docker:build
+  - deploy
+
+# =============================================================================
+maven:build:
+  image: maven:3.5.0-jdk-8-alpine
+  stage: maven:build
+  script:
+    - mvn $MAVEN_CLI_OPTS clean compile package -DskipTests -Dmaven.test.skip=true
+  allow_failure: false
+  artifacts:
+    when: on_success
+    expire_in: 60 mins
+    paths:
+      - "target/"
+      - "authentication-service-ws/target/*.jar"
+
+# =============================================================================
+maven:ut:
+  image: maven:3.5.0-jdk-8-alpine
+  stage: maven:test
+  dependencies:
+    - maven:build
+  script:
+    - mvn $MAVEN_CLI_OPTS validate verify package -PunitTests
+  allow_failure: false
+  artifacts:
+    when: on_success
+    expire_in: 60 mins
+    paths:
+      - target/
+
+# =============================================================================
+maven:it:
+  image: maven:3.5.0-jdk-8-alpine
+  stage: maven:test
+  dependencies:
+    - maven:build
+  script:
+    - mvn $MAVEN_CLI_OPTS validate verify package -PintegrationTests
+  allow_failure: false
+  artifacts:
+    when: on_success
+    expire_in: 60 mins
+    paths:
+      - target/
+
+# =============================================================================
+sonarqube:preview:
+  image: maven:3.5.0-jdk-8-alpine
+  stage: analysis
+  dependencies:
+    - maven:ut
+    - maven:it
+  script:
+    - mvn $MAVEN_CLI_OPTS verify sonar:sonar
+      -Dsonar.host.url=$SONAR_URL
+      -Dsonar.analysis.mode=preview
+      -Dsonar.language=java
+      -Dsonar.projectName=$CI_PROJECT_NAME
+      -Dsonar.projectVersion=$CI_BUILD_ID
+      -Dsonar.projectKey="com.tui.olp.businessrulesservice:${rootArtifactId}"
+      -Dsonar.gitlab.ping_user=true
+      -Dsonar.gitlab.project_id=$CI_PROJECT_ID
+      -Dsonar.gitlab.commit_sha=$CI_BUILD_REF
+      -Dsonar.gitlab.ref_name=$CI_BUILD_REF_NAME
+      -DskipTests
+      -Dmaven.test.skip=true
+  allow_failure: false
+
+# =============================================================================
+sonarqube:report:
+  image: maven:3.5.0-jdk-8-alpine
+  stage: analysis
+  dependencies:
+    - maven:ut
+    - maven:it
+  script:
+    - mvn $MAVEN_CLI_OPTS verify sonar:sonar
+      -Dsonar.host.url=$SONAR_URL
+      -Dsonar.analysis.mode=publish
+      -Dsonar.language=java
+      -Dsonar.projectName=$CI_PROJECT_NAME
+      -Dsonar.projectVersion=$CI_BUILD_ID
+      -Dsonar.projectKey="com.tui.olp.businessrulesservice:${rootArtifactId}"
+      -Dsonar.gitlab.ping_user=true
+      -DskipTests
+      -Dmaven.test.skip=true
+  allow_failure: false
+  only:
+    - develop
+    - master
+
+# ==============================================================================
+docker:build:
+  image: christophgysin/gitlab-ci-ecs-deploy
+  #image: hub.apsl.net/library/gitlab-builder-aws:7463-ecdd132c
+  stage: docker:build
+  dependencies:
+    - maven:build
+  script:
+    - export AWS_ACCESS_KEY_ID=${TUIDS_SHARED_AWS_ACCESS_KEY_ID}
+    - export AWS_SECRET_ACCESS_KEY=${TUIDS_SHARED_AWS_SECRET_ACCESS_KEY}
+    #
+    - $(aws ecr get-login)
+    - docker build -t ${IMAGE} .
+    - docker push ${IMAGE}
+    - echo "Pushed ${IMAGE}"
+    - docker build -t ${IMAGE_LATEST} .
+    - docker push ${IMAGE_LATEST}
+    - echo "Pushed ${IMAGE_LATEST}"
+  allow_failure: false
+  only:
+    - develop
+    - master
+
+# ==============================================================================
+deploy:dev:
+  image: christophgysin/gitlab-ci-ecs-deploy
+  #image: hub.apsl.net/library/gitlab-builder-aws:7463-ecdd132c
+  stage: deploy
+  script:
+    - export AWS_ACCESS_KEY_ID=${TUIDS_DEV_AWS_ACCESS_KEY_ID}
+    - export AWS_SECRET_ACCESS_KEY=${TUIDS_DEV_AWS_SECRET_ACCESS_KEY}
+    - ecs-deploy
+      --aws-access-key ${AWS_ACCESS_KEY_ID}
+      --aws-secret-key ${AWS_SECRET_ACCESS_KEY}
+      --region ${AWS_DEFAULT_REGION}
+      --cluster ${AWS_CLUSTER_DEV}
+      --service-name ${AWS_SERVICE_NAME}
+      --image ${IMAGE}
+      --timeout 900
+  only:
+    - develop
+

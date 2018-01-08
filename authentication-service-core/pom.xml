@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.tui.authenticationservice</groupId>
+        <artifactId>authentication-service</artifactId>
+        <version>0.0.1</version>
+    </parent>
+    <artifactId>authentication-service-core</artifactId>
+    <packaging>jar</packaging>
+    <dependencies>
+        <!-- -->
+        <dependency>
+            <groupId>com.tui.authenticationservice</groupId>
+            <artifactId>authentication-service-exception</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <!-- -->
+        <dependency>
+            <groupId>com.tui.authenticationservice</groupId>
+            <artifactId>authentication-service-db</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- -->
+        <dependency>
+            <groupId>com.tui.authenticationservice</groupId>
+            <artifactId>authentication-service-cache</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- -->
+        <dependency>
+            <groupId>com.tui.authenticationservice</groupId>
+            <artifactId>authentication-service-dto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Spring Cloud -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream</artifactId>
+        </dependency>
+
+        <!-- Uncomment in order to be able to use kafka stream -->
+        <!--<dependency>-->
+        <!--<groupId>org.springframework.cloud</groupId>-->
+        <!--<artifactId>spring-cloud-starter-stream-kafka</artifactId>-->
+        <!--</dependency>-->
+
+        <!-- Uncomment in order to be able to use sleuth stream -->
+        <!--<dependency>-->
+        <!--<groupId>org.springframework.cloud</groupId>-->
+        <!--<artifactId>spring-cloud-sleuth-stream</artifactId>-->
+        <!--</dependency>-->
+
+        <!-- Needed for spring cloud stream binders eg. kafka -->
+        <!--<dependency>-->
+        <!--<groupId>log4j</groupId>-->
+        <!--<artifactId>log4j</artifactId>-->
+        <!--</dependency>-->
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-xml</artifactId>
+        </dependency>
+        <!-- -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Mapstruct -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-jdk8</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Orika simpler, lighter and faster Java bean mapping -->
+        <dependency>
+            <groupId>ma.glasnost.orika</groupId>
+            <artifactId>orika-core</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

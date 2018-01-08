@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/authentication-service.iml" filepath="$PROJECT_DIR$/authentication-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/authentication-service-cache/authentication-service-cache.iml" filepath="$PROJECT_DIR$/authentication-service-cache/authentication-service-cache.iml" />
+      <module fileurl="file://$PROJECT_DIR$/authentication-service-core/authentication-service-core.iml" filepath="$PROJECT_DIR$/authentication-service-core/authentication-service-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/authentication-service-db/authentication-service-db.iml" filepath="$PROJECT_DIR$/authentication-service-db/authentication-service-db.iml" />
+      <module fileurl="file://$PROJECT_DIR$/authentication-service-dto/authentication-service-dto.iml" filepath="$PROJECT_DIR$/authentication-service-dto/authentication-service-dto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/authentication-service-exception/authentication-service-exception.iml" filepath="$PROJECT_DIR$/authentication-service-exception/authentication-service-exception.iml" />
+      <module fileurl="file://$PROJECT_DIR$/authentication-service-util/authentication-service-util.iml" filepath="$PROJECT_DIR$/authentication-service-util/authentication-service-util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/authentication-service-ws/authentication-service-ws.iml" filepath="$PROJECT_DIR$/authentication-service-ws/authentication-service-ws.iml" />
+    </modules>
+  </component>
+</project>

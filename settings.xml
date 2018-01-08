@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <mirrors>
+        <mirror>
+            <id>public-mirror</id>
+            <mirrorOf>*, !tuids</mirrorOf>
+            <url>${NEXUS_URL}/nexus/content/groups/public/</url>
+        </mirror>
+        <mirror>
+            <id>tuids-mirror</id>
+            <mirrorOf>tuids</mirrorOf>
+            <url>${NEXUS_URL}/nexus/content/groups/tuids/</url>
+        </mirror>
+    </mirrors>
+    <profiles>
+        <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>public</id>
+                    <url>${NEXUS_URL}/nexus/content/groups/public/</url>
+                </repository>
+                <repository>
+                    <id>tuids</id>
+                    <url>${NEXUS_URL}/nexus/content/groups/tuids/</url>
+                </repository>
+            </repositories>
+            <id>repositories</id>
+        </profile>
+    </profiles>
+    <servers>
+        <server>
+            <id>tuids-releases</id>
+            <username>${NEXUS_USER}</username>
+            <password>${NEXUS_PASSWORD}</password>
+        </server>
+        <server>
+            <id>tuids-snapshots</id>
+            <username>${NEXUS_USER}</username>
+            <password>${NEXUS_PASSWORD}</password>
+        </server>
+    </servers>
+</settings>
